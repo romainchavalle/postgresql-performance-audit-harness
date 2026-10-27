@@ -68,8 +68,7 @@ postgresql-performance-audit-harness/
 ├── README.md                           # Synthèse exécutive, résultats et analyse d'architecture
 ├── LICENSE                             # Licence MIT
 ├── scripts/
-│   ├── benchmark_real_services.rb      # Harnais de test Rails avec interception ActiveSupport SQL
-│   └── run_real_benchmark.sh           # Script d'exécution Shell autonome
+│   └── benchmark_real_services.rb      # Harnais de test Rails avec interception ActiveSupport SQL
 ├── sql/
 │   ├── 01_nested_loop_case_study.sql   # Étude de cas 1 : Boucle imbriquée -> Hash Join (loops=134262)
 │   └── 02_composite_index_case_study.sql# Étude de cas 2 : Bitmap Heap Scan -> Index Composite
@@ -95,8 +94,8 @@ postgresql-performance-audit-harness/
 git clone https://github.com/romainchavalle/postgresql-performance-audit-harness.git
 cd postgresql-performance-audit-harness
 
-# Lancer le script de benchmark
-./scripts/run_real_benchmark.sh
+# Lancer le benchmark applicatif
+bundle exec ruby scripts/benchmark_real_services.rb
 ```
 
 ---
