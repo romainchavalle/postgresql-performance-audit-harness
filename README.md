@@ -65,19 +65,19 @@ La substitution de `IN (SELECT ...)` par `IN (SELECT DISTINCT ...)` a été vér
 
 ```text
 postgresql-performance-audit-harness/
-├── README.md                           # Synthèse exécutive, résultats et analyse d'architecture
-├── LICENSE                             # Licence MIT
-├── scripts/
-│   └── benchmark_real_services.rb      # Harnais de test Rails avec interception ActiveSupport SQL
-├── sql/
-│   ├── 01_nested_loop_case_study.sql   # Étude de cas 1 : Boucle imbriquée -> Hash Join (loops=134262)
-│   └── 02_composite_index_case_study.sql# Étude de cas 2 : Bitmap Heap Scan -> Index Composite
-├── results/
-│   ├── 01_baseline_real_services.txt   # Journaux bruts de baseline (timeouts à 38s)
-│   └── 02_optimized_real_services.txt  # Journaux post-optimisation (tous les services < 2s)
-└── docs/
-    ├── philosophie_et_demarche.md      # Mémo : Démarche empirique vs Refonte spéculative
-    └── guide_lecture_explain.md        # Guide technique : Comment interpréter un EXPLAIN ANALYZE BUFFERS
+├── README.md                                   # Synthèse exécutive, résultats et analyse d'architecture
+├── LICENSE                                     # Licence MIT
+├── script-tests-de-performance/                # Scripts tests de performance
+│   └── benchmark_real_services.rb              # Harnais de test Rails avec interception ActiveSupport SQL
+├── sql-d-exemple/                              # SQL d'exemple
+│   ├── 01_nested_loop_case_study.sql           # Étude de cas 1 : Boucle imbriquée -> Hash Join (loops=134262)
+│   └── 02_composite_index_case_study.sql       # Étude de cas 2 : Bitmap Heap Scan -> Index Composite
+├── resultats-avant-apres-optimisation/         # Résultats avant / après optimisation
+│   ├── 01_baseline_real_services.txt           # Journaux bruts de baseline (timeouts à 38s)
+│   └── 02_optimized_real_services.txt          # Journaux post-optimisation (tous les services < 2s)
+└── documents-explicatifs/                      # Documents explicatifs
+    ├── philosophie_et_demarche.md              # Mémo : Démarche empirique vs Refonte spéculative
+    └── guide_lecture_explain.md                # Guide technique : Comment interpréter un EXPLAIN ANALYZE BUFFERS
 ```
 
 ---
@@ -95,7 +95,7 @@ git clone https://github.com/romainchavalle/postgresql-performance-audit-harness
 cd postgresql-performance-audit-harness
 
 # Lancer le benchmark applicatif
-bundle exec ruby scripts/benchmark_real_services.rb
+bundle exec ruby script-tests-de-performance/benchmark_real_services.rb
 ```
 
 ---
