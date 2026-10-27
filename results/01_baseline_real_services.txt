@@ -1,0 +1,50 @@
+================================================================================
+BENCHMARK DE REFERENCE - VRAIS SERVICES METIER RAILS (ETAT INITIAL - BASELINE)
+Base de donnees : good_meal_benchmark
+Surveys total : 4 056 469 | Answers total : 19 600 836 | CI total : 5 276 390
+Environnement : Docker PostgreSQL 16 (2 CPUs, 2GB RAM, /dev/shm 512MB)
+================================================================================
+
+>>> Execution de : 1. Dashboard::NpsEvolutionDataBuilder (NPS Evolution)...
+    [SUCCES] Duree totale : 8963.42 ms | Temps SQL cumulé : 8884.12 ms (4 requetes)
+    [PIRE REQUETE] 8847.19 ms :
+            SELECT
+          (COUNT(*) FILTER (WHERE a.nps_value = 1) / COUNT(*)::FLOAT -
+          COUNT(*) FILTER (WHERE a.nps_value = 3) / COUNT(*)::FLOAT) * 100 AS nps,
+          ...
+
+>>> Execution de : 2. Dashboard::CsatEvolutionDataBuilder (CSAT Evolution)...
+    [SUCCES] Duree totale : 9834.18 ms | Temps SQL cumulé : 9780.45 ms (4 requetes)
+    [PIRE REQUETE] 9720.61 ms :
+            SELECT
+          CASE
+          WHEN COUNT(*) = 0 THEN 0
+          ELSE (COUNT(*) FILTER (WHERE a.csat_value IN (1, 2)) * 100.0 / COUNT(*))
+          END AS csat,
+          ...
+
+>>> Execution de : 3. DetailGroupeQuestion::CsatTableBuilder (GQ - CSAT Table)...
+    [SUCCES] Duree totale : 38095.40 ms | Temps SQL cumulé : 36821.14 ms (22 requetes)
+    [PIRE REQUETE] 19842.10 ms :
+        SELECT DISTINCT surveys.id
+        FROM surveys
+        WHERE
+          surveys.restaurant_id IN (2491,2504,2494,2507,2490,2503,2492,2495,2501,2509,2496,2499,2506,2505,2720...)
+          AND surveys.customer_id IN (SELECT ci.customer_id FROM customer_indicators ci ...)
+
+>>> Execution de : 4. DetailGroupeQuestion::QuestionsBuilder (GQ - Questions List)...
+    [SUCCES] Duree totale : 32335.12 ms | Temps SQL cumulé : 31102.80 ms (21 requetes)
+    [PIRE REQUETE] 17451.90 ms :
+        SELECT DISTINCT pa.question_id as question_id, q.theme as theme ...
+
+================================================================================
+RECAPITULATIF DE REFERENCE - ETAT INITIAL (AVANT OPTIMISATION)
+================================================================================
+Service Teste                                              | Temps Total  | Temps SQL    | Nb Requetes 
+----------------------------------------------------------------------------------------------------
+1. Dashboard::NpsEvolutionDataBuilder (NPS Evolution)      |   8963.4 ms  |   8884.1 ms  |          4
+2. Dashboard::CsatEvolutionDataBuilder (CSAT Evolution)    |   9834.2 ms  |   9780.5 ms  |          4
+3. DetailGroupeQuestion::CsatTableBuilder (GQ - CSAT Table) |  38095.4 ms  |  36821.1 ms  |         22
+4. DetailGroupeQuestion::QuestionsBuilder (GQ - Questions List) |  32335.1 ms  |  31102.8 ms  |         21
+================================================================================
+VERDICT : Services 3 & 4 dépassent le timeout strict Heroku de 28s (Timeouts HTTP / Erreurs R14).

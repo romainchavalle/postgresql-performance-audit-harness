@@ -1,0 +1,12 @@
+# Logs and runtime files
+*.log
+tmp/
+.byebug_history
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment and local configs
+.env.local
+.env.*.local

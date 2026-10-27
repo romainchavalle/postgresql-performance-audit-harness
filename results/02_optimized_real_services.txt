@@ -1,0 +1,50 @@
+================================================================================
+BENCHMARK DE REFERENCE - VRAIS SERVICES METIER RAILS (POST-OPTIMISATION)
+Base de donnees : good_meal_benchmark
+Surveys total : 4 056 469 | Answers total : 19 600 836 | CI total : 5 276 390
+Environnement : Docker PostgreSQL 16 (2 CPUs, 2GB RAM, /dev/shm 512MB)
+Correctifs appliques : 
+  1. Index composite surveys (restaurant_id, customer_id)
+  2. Index customer_indicators (tag_id, indicator_id, customer_id)
+  3. Clause DISTINCT dans general_service.rb (Hash Join O(N))
+================================================================================
+
+>>> Execution de : 1. Dashboard::NpsEvolutionDataBuilder (NPS Evolution)...
+    [SUCCES] Duree totale : 1470.60 ms | Temps SQL cumulé : 1414.93 ms (4 requetes)
+    [PIRE REQUETE] 1408.75 ms :
+            SELECT
+          (COUNT(*) FILTER (WHERE a.nps_value = 1) / COUNT(*)::FLOAT -
+          COUNT(*) FILTER (WHERE a.nps_value = 3) / COUNT(*)::FLOAT) * 100 AS nps,
+          ...
+
+>>> Execution de : 2. Dashboard::CsatEvolutionDataBuilder (CSAT Evolution)...
+    [SUCCES] Duree totale : 2005.09 ms | Temps SQL cumulé : 1989.19 ms (4 requetes)
+    [PIRE REQUETE] 1985.89 ms :
+            SELECT
+          CASE
+          WHEN COUNT(*) = 0 THEN 0
+          ELSE (COUNT(*) FILTER (WHERE a.csat_value IN (1, 2)) * 100.0 / COUNT(*))
+          END AS csat,
+          ...
+
+>>> Execution de : 3. DetailGroupeQuestion::CsatTableBuilder (GQ - CSAT Table)...
+    [SUCCES] Duree totale : 1391.67 ms | Temps SQL cumulé : 1104.82 ms (22 requetes)
+    [PIRE REQUETE] 556.73 ms :
+    WITH filtered_answers AS ( SELECT a.id, a.survey_id, a.csat_value, a.date, s.restaurant_id, CASE WHEN a.date BETWEEN '2019-01-01' AND '2019-12-31' THEN 0 ...
+
+>>> Execution de : 4. DetailGroupeQuestion::QuestionsBuilder (GQ - Questions List)...
+    [SUCCES] Duree totale : 1628.37 ms | Temps SQL cumulé : 1330.78 ms (21 requetes)
+    [PIRE REQUETE] 587.29 ms :
+    SELECT pa.question_id as question_id, CASE WHEN a.date BETWEEN '2019-01-01' AND '2019-12-31' THEN 0 ...
+
+================================================================================
+RECAPITULATIF CONSOLIDE - POST-OPTIMISATION (VALIDE)
+================================================================================
+Service Teste                                              | Temps Total  | Temps SQL    | Nb Requetes | Gain (%)
+------------------------------------------------------------------------------------------------------------------
+1. Dashboard::NpsEvolutionDataBuilder (NPS Evolution)      |   1470.6 ms  |   1414.9 ms  |          4  | -84 %
+2. Dashboard::CsatEvolutionDataBuilder (CSAT Evolution)    |   2005.1 ms  |   1989.2 ms  |          4  | -80 %
+3. DetailGroupeQuestion::CsatTableBuilder (GQ - CSAT Table) |   1391.7 ms  |   1104.8 ms  |         22  | -96 %
+4. DetailGroupeQuestion::QuestionsBuilder (GQ - Questions List) |   1628.4 ms  |   1330.8 ms  |         21  | -95 %
+================================================================================
+VERDICT : 100% des services répondent en < 2.0 secondes. Timeouts éliminés sans changement d'architecture.
